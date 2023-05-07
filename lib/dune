@@ -1,0 +1,4 @@
+(library
+ (public_name cobtree)
+ (name cobtree)
+ (libraries kcas zarith))
