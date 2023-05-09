@@ -1,5 +1,3 @@
-open Kcas
-
 module Math_util = struct
   let log2 x = (Float.of_int x)
     |> Float.log2
@@ -15,14 +13,10 @@ end
 
 module Density = struct
   module type IConfig = sig
-    (* max density for 2^num_densities cells: 1/2 *)
-    val t_min : Q.t
-    (* max density for 2^1 cells: 1 *)
-    val t_max : Q.t
-    (* min density for 2^num_densities cells: 1/4 *)
-    val p_max : Q.t
-    (* min density for 2^1 cells: 1/8 *)
-    val p_min : Q.t
+    val p_max : Q.t (* min density for 2^num_densities cells: 1/4 *)
+    val t_min : Q.t (* max density for 2^num_densities cells: 1/2 *)
+    val p_min : Q.t (* min density for 2^1 cells: 1/8 *)
+    val t_max : Q.t (* max density for 2^1 cells: 1 *)
   end
 
   type t = {
@@ -43,7 +37,7 @@ module Density = struct
     else
       max_cmp
 
-  let threshold_of_size xs n =
+  let threshold_of_size n xs =
     List.find (fun x -> x.max_n >= n) xs
 
   let within_threshold n d =
@@ -76,24 +70,20 @@ module Density = struct
   end
 
   module Default = Make(struct
-    open Q
-    (* max density for 2^num_densities cells: 1/2 *)
-    let t_min = of_ints 1 2
-    (* max density for 2^1 cells: 1 *)
-    let t_max = one
-    (* min density for 2^num_densities cells: 1/4 *)
-    let p_max = of_ints 1 4
-    (* min density for 2^1 cells: 1/8 *)
-    let p_min = of_ints 1 8
+    let p_max = Q.of_ints 1 4 (* 1/4 *)
+    let t_min = Q.of_ints 1 2 (* 1/2 *)
+    let p_min = Q.of_ints 1 8 (* 1/8 *)
+    let t_max = Q.one
   end)
 end
 
 module Packed_memory_array = struct
+  open Kcas
+  module D = Density.Default
+
   type cfg = {
     density_scale : Density.t list;
   }
-
-  module D = Density.Default
 
   type 'a t = {
     cells : 'a Loc.t array;
